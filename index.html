@@ -1,0 +1,404 @@
+import { useState, useEffect, useRef } from "react";
+
+const GROUPS = {
+  A: [
+    { id: "mexico", name: "Mexico", flag: "🇲🇽", spice: "Chile Powder", emoji: "🌶️", color: "#C4161C" },
+    { id: "south_africa", name: "South Africa", flag: "🇿🇦", spice: "Rooibos", emoji: "🍵", color: "#C2553A" },
+    { id: "south_korea", name: "South Korea", flag: "🇰🇷", spice: "Gochugaru", emoji: "🫑", color: "#E03C31" },
+    { id: "denmark", name: "Denmark", flag: "🇩🇰", spice: "Dill", emoji: "🌿", color: "#5B8C5A" },
+  ],
+  B: [
+    { id: "canada", name: "Canada", flag: "🇨🇦", spice: "Maple", emoji: "🍁", color: "#C27A2B" },
+    { id: "italy", name: "Italy", flag: "🇮🇹", spice: "Basil", emoji: "🌿", color: "#2D8B46" },
+    { id: "qatar", name: "Qatar", flag: "🇶🇦", spice: "Cardamom", emoji: "🫛", color: "#5A7247" },
+    { id: "switzerland", name: "Switzerland", flag: "🇨🇭", spice: "Chives", emoji: "🧅", color: "#6B8F4B" },
+  ],
+  C: [
+    { id: "brazil", name: "Brazil", flag: "🇧🇷", spice: "Cilantro", emoji: "🌿", color: "#3A9B4F" },
+    { id: "morocco", name: "Morocco", flag: "🇲🇦", spice: "Cumin", emoji: "🫘", color: "#C68B3E" },
+    { id: "haiti", name: "Haiti", flag: "🇭🇹", spice: "Clove", emoji: "🪵", color: "#6B3A2A" },
+    { id: "scotland", name: "Scotland", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", spice: "Juniper", emoji: "🫐", color: "#3B5998" },
+  ],
+  D: [
+    { id: "usa", name: "USA", flag: "🇺🇸", spice: "Smoked Paprika", emoji: "🔥", color: "#B5451B" },
+    { id: "paraguay", name: "Paraguay", flag: "🇵🇾", spice: "Yerba Mate", emoji: "🧉", color: "#4A7C3F" },
+    { id: "australia", name: "Australia", flag: "🇦🇺", spice: "Lemon Myrtle", emoji: "🍋", color: "#C9B84E" },
+    { id: "turkiye", name: "Türkiye", flag: "🇹🇷", spice: "Sumac", emoji: "🍇", color: "#8B2252" },
+  ],
+  E: [
+    { id: "germany", name: "Germany", flag: "🇩🇪", spice: "Caraway", emoji: "🌰", color: "#7A6240" },
+    { id: "curacao", name: "Curaçao", flag: "🇨🇼", spice: "Allspice", emoji: "⚫", color: "#6B4226" },
+    { id: "ivory_coast", name: "Ivory Coast", flag: "🇨🇮", spice: "Grains of Paradise", emoji: "✨", color: "#8B6914" },
+    { id: "ecuador", name: "Ecuador", flag: "🇪🇨", spice: "Achiote", emoji: "🟠", color: "#D4652F" },
+  ],
+  F: [
+    { id: "netherlands", name: "Netherlands", flag: "🇳🇱", spice: "Nutmeg", emoji: "🥜", color: "#8B5E3C" },
+    { id: "japan", name: "Japan", flag: "🇯🇵", spice: "Wasabi", emoji: "🟢", color: "#5B8930" },
+    { id: "poland", name: "Poland", flag: "🇵🇱", spice: "Marjoram", emoji: "🌿", color: "#6B7F4A" },
+    { id: "tunisia", name: "Tunisia", flag: "🇹🇳", spice: "Harissa Pepper", emoji: "🌶️", color: "#CC3333" },
+  ],
+  G: [
+    { id: "belgium", name: "Belgium", flag: "🇧🇪", spice: "Bay Leaf", emoji: "🍃", color: "#4A6741" },
+    { id: "egypt", name: "Egypt", flag: "🇪🇬", spice: "Fenugreek", emoji: "🌾", color: "#B89B3E" },
+    { id: "iran", name: "Iran", flag: "🇮🇷", spice: "Saffron", emoji: "🌸", color: "#D4A017" },
+    { id: "new_zealand", name: "New Zealand", flag: "🇳🇿", spice: "Horopito", emoji: "🌿", color: "#2E5E3F" },
+  ],
+  H: [
+    { id: "spain", name: "Spain", flag: "🇪🇸", spice: "Oregano", emoji: "🌿", color: "#5A7C47" },
+    { id: "cape_verde", name: "Cape Verde", flag: "🇨🇻", spice: "Malagueta Pepper", emoji: "🌶️", color: "#D44E2F" },
+    { id: "saudi_arabia", name: "Saudi Arabia", flag: "🇸🇦", spice: "Black Lime", emoji: "🖤", color: "#2C2C2C" },
+    { id: "uruguay", name: "Uruguay", flag: "🇺🇾", spice: "Parsley", emoji: "🌿", color: "#3B8132" },
+  ],
+  I: [
+    { id: "france", name: "France", flag: "🇫🇷", spice: "Tarragon", emoji: "🌿", color: "#4A7B5D" },
+    { id: "senegal", name: "Senegal", flag: "🇸🇳", spice: "Nététou", emoji: "🫘", color: "#6B4F3A" },
+    { id: "iraq", name: "Iraq", flag: "🇮🇶", spice: "Turmeric", emoji: "🟡", color: "#E0A526" },
+    { id: "norway", name: "Norway", flag: "🇳🇴", spice: "Angelica", emoji: "🌸", color: "#7A8B6F" },
+  ],
+  J: [
+    { id: "argentina", name: "Argentina", flag: "🇦🇷", spice: "Rosemary", emoji: "🌿", color: "#5C7A4B" },
+    { id: "algeria", name: "Algeria", flag: "🇩🇿", spice: "Cinnamon", emoji: "🪵", color: "#A0522D" },
+    { id: "austria", name: "Austria", flag: "🇦🇹", spice: "Poppy Seed", emoji: "🌑", color: "#3A3A5C" },
+    { id: "jordan", name: "Jordan", flag: "🇯🇴", spice: "Thyme", emoji: "🌿", color: "#6B7B4A" },
+  ],
+  K: [
+    { id: "portugal", name: "Portugal", flag: "🇵🇹", spice: "Piri Piri", emoji: "🔥", color: "#C83C23" },
+    { id: "dr_congo", name: "DR Congo", flag: "🇨🇩", spice: "Black Pepper", emoji: "⚫", color: "#333333" },
+    { id: "uzbekistan", name: "Uzbekistan", flag: "🇺🇿", spice: "Nigella Seed", emoji: "🌑", color: "#2A2A3A" },
+    { id: "colombia", name: "Colombia", flag: "🇨🇴", spice: "Guascas", emoji: "🌿", color: "#4A8B3F" },
+  ],
+  L: [
+    { id: "england", name: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", spice: "Mustard Seed", emoji: "🟡", color: "#CCA300" },
+    { id: "croatia", name: "Croatia", flag: "🇭🇷", spice: "Lavender", emoji: "💜", color: "#7B68AE" },
+    { id: "ghana", name: "Ghana", flag: "🇬🇭", spice: "Ginger", emoji: "🫚", color: "#C9A84C" },
+    { id: "panama", name: "Panama", flag: "🇵🇦", spice: "Culantro", emoji: "🌿", color: "#3D7A3A" },
+  ],
+};
+
+const GROUP_KEYS = Object.keys(GROUPS);
+
+const PHASE_GROUP = "group";
+const PHASE_PLAYIN = "playin";
+const PHASE_R16 = "r16";
+const PHASE_QF = "qf";
+const PHASE_SF = "sf";
+const PHASE_FINAL = "final";
+const PHASE_CHAMPION = "champion";
+
+const PHASE_LABELS = {
+  [PHASE_GROUP]: "Group Stage",
+  [PHASE_PLAYIN]: "Play-In Round",
+  [PHASE_R16]: "Round of 16",
+  [PHASE_QF]: "Quarter-Finals",
+  [PHASE_SF]: "Semi-Finals",
+  [PHASE_FINAL]: "The Final",
+  [PHASE_CHAMPION]: "Champion",
+};
+
+const KNOCKOUT_PHASES = [PHASE_PLAYIN, PHASE_R16, PHASE_QF, PHASE_SF, PHASE_FINAL, PHASE_CHAMPION];
+
+const phaseColors = {
+  [PHASE_GROUP]: "#D4AF37",
+  [PHASE_PLAYIN]: "#C87533",
+  [PHASE_R16]: "#D44E2F",
+  [PHASE_QF]: "#B5451B",
+  [PHASE_SF]: "#8B2252",
+  [PHASE_FINAL]: "#D4AF37",
+  [PHASE_CHAMPION]: "#D4AF37",
+};
+
+function SpiceCard({ team, onClick, selected, eliminated, small, winner }) {
+  return (
+    <div
+      style={{
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        padding: small ? "8px 10px" : "14px 16px", borderRadius: "10px",
+        cursor: eliminated ? "default" : onClick ? "pointer" : "default",
+        border: selected ? `2px solid ${team.color}` : winner ? "2px solid #D4AF37" : "2px solid transparent",
+        background: eliminated ? "rgba(60,60,60,0.3)" : selected ? `linear-gradient(135deg, ${team.color}22, ${team.color}11)` : "rgba(255,255,255,0.04)",
+        opacity: eliminated ? 0.35 : 1, transition: "all 0.3s cubic-bezier(0.4,0,0.2,1)",
+        minWidth: small ? "110px" : "130px", position: "relative", overflow: "hidden",
+        boxShadow: selected ? `0 4px 20px ${team.color}33` : winner ? "0 4px 20px rgba(212,175,55,0.3)" : "none",
+      }}
+      onClick={eliminated ? undefined : onClick}
+      onMouseEnter={(e) => { if (!eliminated && onClick) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.background = `linear-gradient(135deg, ${team.color}33, ${team.color}18)`; } }}
+      onMouseLeave={(e) => { if (!eliminated && onClick) { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.background = selected ? `linear-gradient(135deg, ${team.color}22, ${team.color}11)` : "rgba(255,255,255,0.04)"; } }}
+    >
+      {winner && <div style={{ position: "absolute", top: "-2px", right: "6px", fontSize: "14px" }}>👑</div>}
+      <div style={{ fontSize: small ? "22px" : "28px", marginBottom: "4px" }}>{team.emoji}</div>
+      <div style={{ fontSize: small ? "11px" : "13px", fontWeight: 700, color: eliminated ? "#666" : "#E8E0D4", letterSpacing: "0.03em", textAlign: "center", lineHeight: 1.2 }}>{team.spice}</div>
+      <div style={{ fontSize: small ? "9px" : "10px", color: eliminated ? "#555" : "#9A9080", marginTop: "3px", display: "flex", alignItems: "center", gap: "3px" }}>
+        <span>{team.flag}</span><span>{team.name}</span>
+      </div>
+    </div>
+  );
+}
+
+function GroupCard({ groupKey, teams, selections, onSelect, locked }) {
+  const selected = selections[groupKey] || [];
+  const isSelected = (t) => selected.some((s) => s.id === t.id);
+  const isEliminated = (t) => selected.length >= 2 && !isSelected(t);
+  return (
+    <div style={{ background: "rgba(255,255,255,0.02)", borderRadius: "14px", padding: "16px", border: locked ? "1px solid rgba(212,175,55,0.15)" : "1px solid rgba(255,255,255,0.06)", transition: "all 0.3s ease" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+        <span style={{ fontSize: "11px", fontWeight: 800, color: "#D4AF37", background: "rgba(212,175,55,0.12)", padding: "3px 8px", borderRadius: "4px", letterSpacing: "0.1em" }}>GROUP {groupKey}</span>
+        <span style={{ fontSize: "10px", color: locked ? "#7A9A5A" : "#9A9080" }}>{locked ? "✓ Complete" : `${selected.length}/2 selected`}</span>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+        {teams.map((team) => (
+          <SpiceCard key={team.id} team={team} onClick={locked ? undefined : () => onSelect(groupKey, team)} selected={isSelected(team)} eliminated={isEliminated(team)} small />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ByeCard({ team }) {
+  return (
+    <div style={{ borderRadius: "12px", background: `linear-gradient(135deg, ${team.color}08, ${team.color}04)`, border: `1px solid ${team.color}22`, padding: "10px 14px", display: "flex", alignItems: "center", gap: "10px" }}>
+      <div style={{ fontSize: "22px" }}>{team.emoji}</div>
+      <div>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#E8E0D4" }}>{team.spice}</div>
+        <div style={{ fontSize: "9px", color: "#9A9080" }}>{team.flag} {team.name}</div>
+      </div>
+      <div style={{ marginLeft: "auto", fontSize: "8px", fontWeight: 700, color: "#D4AF37", letterSpacing: "0.1em", textTransform: "uppercase" }}>BYE → R16</div>
+    </div>
+  );
+}
+
+function MatchupCard({ match, onSelect, phaseColor }) {
+  if (!match || !match.team1 || !match.team2) return <div style={{ padding: "20px", borderRadius: "12px", background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)", textAlign: "center", color: "#555", fontSize: "12px" }}>Awaiting teams...</div>;
+  const { team1, team2, winner } = match;
+  const side = (team, isLeft) => {
+    const isWinner = winner && winner.id === team.id;
+    const isLoser = winner && winner.id !== team.id;
+    return (
+      <div
+        style={{ flex: 1, padding: "12px", cursor: "pointer", background: isWinner ? `${team.color}15` : "transparent", transition: "all 0.2s ease", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", borderRight: isLeft ? "1px solid rgba(255,255,255,0.04)" : "none", borderLeft: !isLeft ? "1px solid rgba(255,255,255,0.04)" : "none" }}
+        onClick={() => onSelect(match.id, team)}
+        onMouseEnter={(e) => { e.currentTarget.style.background = `${team.color}20`; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = isWinner ? `${team.color}15` : "transparent"; }}
+      >
+        <div style={{ fontSize: "26px", marginBottom: "4px" }}>{team.emoji}</div>
+        <div style={{ fontSize: "12px", fontWeight: 700, color: isLoser ? "#555" : "#E8E0D4", textAlign: "center" }}>{team.spice}</div>
+        <div style={{ fontSize: "9px", color: "#9A9080", marginTop: "2px" }}>{team.flag} {team.name}</div>
+        {isWinner && <div style={{ fontSize: "10px", marginTop: "4px" }}>👑</div>}
+      </div>
+    );
+  };
+  return (
+    <div style={{ borderRadius: "12px", background: "rgba(255,255,255,0.02)", border: winner ? `1px solid ${phaseColor}22` : "1px solid rgba(255,255,255,0.06)", overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "stretch" }}>
+        {side(team1, true)}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", fontSize: "10px", fontWeight: 800, color: "#555", letterSpacing: "0.05em" }}>VS</div>
+        {side(team2, false)}
+      </div>
+    </div>
+  );
+}
+
+function ChampionReveal({ team }) {
+  const [show, setShow] = useState(false);
+  useEffect(() => { setTimeout(() => setShow(true), 100); }, []);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "50px 20px", textAlign: "center", opacity: show ? 1 : 0, transform: show ? "scale(1)" : "scale(0.8)", transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
+      <div style={{ fontSize: "48px", marginBottom: "8px" }}>🏆</div>
+      <div style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.3em", color: "#D4AF37", marginBottom: "16px", textTransform: "uppercase" }}>World's Greatest Herb & Spice</div>
+      <div style={{ fontSize: "64px", marginBottom: "12px" }}>{team.emoji}</div>
+      <div style={{ fontSize: "32px", fontWeight: 800, color: "#E8E0D4", marginBottom: "8px", textShadow: `0 0 40px ${team.color}66` }}>{team.spice}</div>
+      <div style={{ fontSize: "16px", color: "#9A9080", display: "flex", alignItems: "center", gap: "6px" }}><span>{team.flag}</span> {team.name}</div>
+      <div style={{ marginTop: "24px", width: "80px", height: "3px", background: `linear-gradient(90deg, transparent, ${team.color}, transparent)`, borderRadius: "2px" }} />
+    </div>
+  );
+}
+
+export default function HerbWorldCup() {
+  const [phase, setPhase] = useState(PHASE_GROUP);
+  const [groupSelections, setGroupSelections] = useState({});
+  const [knockoutMatches, setKnockoutMatches] = useState({});
+  const [byeTeams, setByeTeams] = useState([]);
+  const [champion, setChampion] = useState(null);
+  const contentRef = useRef(null);
+
+  const handleGroupSelect = (groupKey, team) => {
+    setGroupSelections((prev) => {
+      const current = prev[groupKey] || [];
+      if (current.find((t) => t.id === team.id)) return { ...prev, [groupKey]: current.filter((t) => t.id !== team.id) };
+      if (current.length >= 2) return prev;
+      return { ...prev, [groupKey]: [...current, team] };
+    });
+  };
+
+  const allGroupsComplete = GROUP_KEYS.every((k) => (groupSelections[k] || []).length === 2);
+
+  // 8 group winners (A-H pick 0) get byes. 16 remaining teams play 8 play-in matches.
+  const buildPlayIn = () => {
+    const byes = ["A","B","C","D","E","F","G","H"].map((g) => groupSelections[g][0]);
+    const matches = {};
+    const pairings = [
+      [["A",1],["I",0]], [["B",1],["I",1]], [["C",1],["J",0]], [["D",1],["J",1]],
+      [["E",1],["K",0]], [["F",1],["K",1]], [["G",1],["L",0]], [["H",1],["L",1]],
+    ];
+    pairings.forEach(([[g1,s1],[g2,s2]], i) => {
+      matches[`playin_${i}`] = { id: `playin_${i}`, team1: groupSelections[g1][s1], team2: groupSelections[g2][s2], winner: null };
+    });
+    return { byes, matches };
+  };
+
+  const advanceToPlayIn = () => {
+    const { byes, matches } = buildPlayIn();
+    setByeTeams(byes);
+    setKnockoutMatches(matches);
+    setPhase(PHASE_PLAYIN);
+  };
+
+  const handleKnockoutSelect = (matchId, team) => {
+    setKnockoutMatches((prev) => {
+      const match = prev[matchId];
+      if (match.winner?.id === team.id) return { ...prev, [matchId]: { ...match, winner: null } };
+      return { ...prev, [matchId]: { ...match, winner: team } };
+    });
+  };
+
+  const getMatchesForPhase = (p) => {
+    const prefix = p === PHASE_PLAYIN ? "playin_" : p === PHASE_R16 ? "r16_" : p === PHASE_QF ? "qf_" : p === PHASE_SF ? "sf_" : "final_";
+    return Object.values(knockoutMatches).filter((m) => m.id.startsWith(prefix));
+  };
+
+  const allMatchesComplete = (p) => {
+    const m = getMatchesForPhase(p);
+    return m.length > 0 && m.every((x) => x.winner);
+  };
+
+  const buildR16 = () => {
+    const winners = getMatchesForPhase(PHASE_PLAYIN).map((m) => m.winner);
+    const newMatches = { ...knockoutMatches };
+    for (let i = 0; i < 8; i++) {
+      newMatches[`r16_${i}`] = { id: `r16_${i}`, team1: byeTeams[i], team2: winners[i], winner: null };
+    }
+    setKnockoutMatches(newMatches);
+    setPhase(PHASE_R16);
+  };
+
+  const buildNextRound = (cur, next) => {
+    const winners = getMatchesForPhase(cur).map((m) => m.winner).filter(Boolean);
+    const prefix = next === PHASE_QF ? "qf_" : next === PHASE_SF ? "sf_" : "final_";
+    const newMatches = { ...knockoutMatches };
+    for (let i = 0; i < winners.length; i += 2) {
+      if (winners[i] && winners[i+1]) newMatches[`${prefix}${Math.floor(i/2)}`] = { id: `${prefix}${Math.floor(i/2)}`, team1: winners[i], team2: winners[i+1], winner: null };
+    }
+    setKnockoutMatches(newMatches);
+    setPhase(next);
+  };
+
+  const advancePhase = () => {
+    if (phase === PHASE_PLAYIN) buildR16();
+    else if (phase === PHASE_R16) buildNextRound(PHASE_R16, PHASE_QF);
+    else if (phase === PHASE_QF) buildNextRound(PHASE_QF, PHASE_SF);
+    else if (phase === PHASE_SF) buildNextRound(PHASE_SF, PHASE_FINAL);
+    else if (phase === PHASE_FINAL) {
+      const fm = getMatchesForPhase(PHASE_FINAL)[0];
+      if (fm?.winner) { setChampion(fm.winner); setPhase(PHASE_CHAMPION); }
+    }
+  };
+
+  const resetAll = () => { setPhase(PHASE_GROUP); setGroupSelections({}); setKnockoutMatches({}); setByeTeams([]); setChampion(null); };
+
+  useEffect(() => { if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: "smooth" }); }, [phase]);
+
+  const phaseIndex = [PHASE_GROUP, ...KNOCKOUT_PHASES].indexOf(phase);
+  const phaseLabelsShort = ["Groups", "Play-In", "R16", "QF", "SF", "Final"];
+  const incompleteGroups = GROUP_KEYS.filter((k) => (groupSelections[k] || []).length < 2).length;
+  const remainingMatchups = phase !== PHASE_GROUP && phase !== PHASE_CHAMPION ? getMatchesForPhase(phase).filter((m) => !m.winner).length : 0;
+  const nextPhaseLabel = () => { const idx = KNOCKOUT_PHASES.indexOf(phase); return idx >= 0 && idx < KNOCKOUT_PHASES.length - 1 ? PHASE_LABELS[KNOCKOUT_PHASES[idx + 1]] : "Next Round"; };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#0F0E0C", color: "#E8E0D4", fontFamily: "'Instrument Sans', 'DM Sans', system-ui, sans-serif", position: "relative", overflow: "hidden" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap');
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.2); border-radius: 3px; }
+      `}</style>
+      <div style={{ position: "fixed", inset: 0, background: "radial-gradient(ellipse at 20% 20%, rgba(212,175,55,0.03) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(139,34,82,0.02) 0%, transparent 60%)", pointerEvents: "none" }} />
+
+      {/* Header */}
+      <div style={{ padding: "20px 24px 12px", borderBottom: "1px solid rgba(255,255,255,0.04)", position: "relative", zIndex: 2 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+          <div>
+            <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.25em", color: "#D4AF37", textTransform: "uppercase", marginBottom: "4px" }}>Herb & Spice</div>
+            <h1 style={{ fontSize: "22px", fontWeight: 800, color: "#E8E0D4", lineHeight: 1.1, fontFamily: "'DM Serif Display', serif" }}>World Cup 2026</h1>
+          </div>
+          {phase !== PHASE_GROUP && <button onClick={resetAll} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#9A9080", padding: "6px 14px", borderRadius: "6px", fontSize: "11px", cursor: "pointer", fontWeight: 600 }}>Start Over</button>}
+        </div>
+        <div style={{ display: "flex", gap: "3px" }}>
+          {phaseLabelsShort.map((_, i) => <div key={i} style={{ flex: 1, height: "3px", borderRadius: "2px", background: i <= phaseIndex ? phaseColors[phase] : "rgba(255,255,255,0.06)", transition: "all 0.5s ease", opacity: i <= phaseIndex ? 1 : 0.5 }} />)}
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px", fontSize: "8px", fontWeight: 600, color: "#666", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+          {phaseLabelsShort.map((l, i) => <span key={l} style={{ color: i <= phaseIndex ? phaseColors[phase] : "#666" }}>{l}</span>)}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div ref={contentRef} style={{ padding: "16px 16px 120px", position: "relative", zIndex: 1, overflow: "auto" }}>
+        <div style={{ textAlign: "center", marginBottom: "20px", animation: "fadeIn 0.5s ease" }}>
+          <div style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.2em", color: phaseColors[phase], textTransform: "uppercase", marginBottom: "4px" }}>{PHASE_LABELS[phase]}</div>
+          <div style={{ fontSize: "12px", color: "#9A9080" }}>
+            {phase === PHASE_GROUP ? "Pick 2 herbs/spices from each group to advance" : phase === PHASE_PLAYIN ? "8 group winners get a bye — these 16 fight for the remaining R16 spots" : phase === PHASE_CHAMPION ? "" : "Click the winner of each matchup"}
+          </div>
+        </div>
+
+        {phase === PHASE_GROUP && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "12px", animation: "fadeIn 0.4s ease" }}>
+            {GROUP_KEYS.map((k) => <GroupCard key={k} groupKey={k} teams={GROUPS[k]} selections={groupSelections} onSelect={handleGroupSelect} locked={(groupSelections[k] || []).length === 2} />)}
+          </div>
+        )}
+
+        {phase === PHASE_PLAYIN && (
+          <div style={{ animation: "fadeIn 0.4s ease" }}>
+            <div style={{ marginBottom: "20px" }}>
+              <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.15em", color: "#7A9A5A", textTransform: "uppercase", marginBottom: "8px" }}>🛡️ Group Winners — Automatic R16 Berth</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "8px" }}>
+                {byeTeams.map((t) => <ByeCard key={t.id} team={t} />)}
+              </div>
+            </div>
+            <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.15em", color: phaseColors[PHASE_PLAYIN], textTransform: "uppercase", marginBottom: "8px" }}>⚔️ Play-In Matches</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "12px" }}>
+              {getMatchesForPhase(PHASE_PLAYIN).map((m) => <MatchupCard key={m.id} match={m} onSelect={handleKnockoutSelect} phaseColor={phaseColors[PHASE_PLAYIN]} />)}
+            </div>
+          </div>
+        )}
+
+        {[PHASE_R16, PHASE_QF, PHASE_SF, PHASE_FINAL].includes(phase) && (
+          <div style={{ display: "grid", gridTemplateColumns: phase === PHASE_FINAL ? "1fr" : phase === PHASE_SF ? "repeat(auto-fit, minmax(280px, 1fr))" : "repeat(auto-fit, minmax(260px, 1fr))", gap: "12px", maxWidth: phase === PHASE_FINAL ? "400px" : "none", margin: phase === PHASE_FINAL ? "0 auto" : "0", animation: "fadeIn 0.4s ease" }}>
+            {getMatchesForPhase(phase).map((m) => <MatchupCard key={m.id} match={m} onSelect={handleKnockoutSelect} phaseColor={phaseColors[phase]} />)}
+          </div>
+        )}
+
+        {phase === PHASE_CHAMPION && champion && <ChampionReveal team={champion} />}
+      </div>
+
+      {/* Bottom bar */}
+      {phase !== PHASE_CHAMPION && (
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 24px", paddingBottom: "max(16px, env(safe-area-inset-bottom))", background: "linear-gradient(transparent, #0F0E0C 30%)", zIndex: 10, display: "flex", justifyContent: "center" }}>
+          {phase === PHASE_GROUP ? (
+            <button onClick={advanceToPlayIn} disabled={!allGroupsComplete} style={{ background: allGroupsComplete ? "linear-gradient(135deg, #D4AF37, #B8941F)" : "rgba(255,255,255,0.05)", color: allGroupsComplete ? "#0F0E0C" : "#555", border: "none", padding: "14px 40px", borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: allGroupsComplete ? "pointer" : "default", letterSpacing: "0.05em", transition: "all 0.3s ease", boxShadow: allGroupsComplete ? "0 4px 24px rgba(212,175,55,0.3)" : "none", width: "100%", maxWidth: "400px" }}>
+              {allGroupsComplete ? "Advance to Knockouts →" : `Select from ${incompleteGroups} more group${incompleteGroups === 1 ? "" : "s"}`}
+            </button>
+          ) : (
+            <button onClick={advancePhase} disabled={!allMatchesComplete(phase)} style={{ background: allMatchesComplete(phase) ? `linear-gradient(135deg, ${phaseColors[phase]}, ${phaseColors[phase]}CC)` : "rgba(255,255,255,0.05)", color: allMatchesComplete(phase) ? "#FFF" : "#555", border: "none", padding: "14px 40px", borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: allMatchesComplete(phase) ? "pointer" : "default", letterSpacing: "0.05em", transition: "all 0.3s ease", boxShadow: allMatchesComplete(phase) ? `0 4px 24px ${phaseColors[phase]}44` : "none", width: "100%", maxWidth: "400px" }}>
+              {allMatchesComplete(phase) ? (phase === PHASE_FINAL ? "Crown the Champion 🏆" : `Advance to ${nextPhaseLabel()} →`) : `${remainingMatchups} matchup${remainingMatchups === 1 ? "" : "s"} remaining`}
+            </button>
+          )}
+        </div>
+      )}
+      {phase === PHASE_CHAMPION && (
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 24px", paddingBottom: "max(16px, env(safe-area-inset-bottom))", background: "linear-gradient(transparent, #0F0E0C 30%)", zIndex: 10, display: "flex", justifyContent: "center" }}>
+          <button onClick={resetAll} style={{ background: "linear-gradient(135deg, #D4AF37, #B8941F)", color: "#0F0E0C", border: "none", padding: "14px 40px", borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: "pointer", letterSpacing: "0.05em", boxShadow: "0 4px 24px rgba(212,175,55,0.3)", width: "100%", maxWidth: "400px" }}>Play Again 🔄</button>
+        </div>
+      )}
+    </div>
+  );
+}
